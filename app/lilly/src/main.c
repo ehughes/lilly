@@ -8,6 +8,8 @@
 #include <zephyr/device.h>
 #include <zephyr/drivers/display.h>
 #include <zephyr/drivers/gpio.h>
+#include <zephyr/drivers/uart.h>
+#include <zephyr/usb/usb_device.h>
 #include <zephyr/logging/log.h>
 #include <string.h>
 
@@ -20,6 +22,69 @@ static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(DT_ALIAS(led0), gpios);
 
 /* Slideshow timing */
 #define SLIDE_DURATION_MS 3000
+
+/* Byte-swap macro for big-endian display */
+#define SWAP16(x) (((x) >> 8) | (((x) & 0xFF) << 8))
+
+/* RGB565 color definitions (byte-swapped for big-endian display) */
+#define RGB565_RED     SWAP16(0xF800)  /* R=31, G=0,  B=0  */
+#define RGB565_GREEN   SWAP16(0x07E0)  /* R=0,  G=63, B=0  */
+#define RGB565_BLUE    SWAP16(0x001F)  /* R=0,  G=0,  B=31 */
+#define RGB565_WHITE   SWAP16(0xFFFF)
+#define RGB565_BLACK   SWAP16(0x0000)
+#define RGB565_YELLOW  SWAP16(0xFFE0)  /* R=31, G=63, B=0  */
+#define RGB565_CYAN    SWAP16(0x07FF)  /* R=0,  G=63, B=31 */
+#define RGB565_MAGENTA SWAP16(0xF81F)  /* R=31, G=0,  B=31 */
+
+/* Test pattern buffer - one row at a time to save RAM */
+static uint16_t row_buf[240];
+
+static void display_color_test(const struct device *dev)
+{
+	struct display_buffer_descriptor desc;
+	int y;
+
+	desc.buf_size = sizeof(row_buf);
+	desc.pitch = 240;
+	desc.width = 240;
+	desc.height = 1;
+	desc.frame_incomplete = false;
+
+	LOG_INF("=== COLOR TEST PATTERN ===");
+	LOG_INF("Rows 0-39:    Should be RED");
+	LOG_INF("Rows 40-79:   Should be GREEN");
+	LOG_INF("Rows 80-119:  Should be BLUE");
+	LOG_INF("Rows 120-159: Should be WHITE");
+	LOG_INF("Rows 160-199: Should be YELLOW");
+	LOG_INF("Rows 200-239: Should be CYAN");
+
+	for (y = 0; y < 240; y++) {
+		uint16_t color;
+
+		if (y < 40) {
+			color = RGB565_RED;
+		} else if (y < 80) {
+			color = RGB565_GREEN;
+		} else if (y < 120) {
+			color = RGB565_BLUE;
+		} else if (y < 160) {
+			color = RGB565_WHITE;
+		} else if (y < 200) {
+			color = RGB565_YELLOW;
+		} else {
+			color = RGB565_CYAN;
+		}
+
+		/* Fill row with color */
+		for (int x = 0; x < 240; x++) {
+			row_buf[x] = color;
+		}
+
+		display_write(dev, 0, y, &desc, row_buf);
+	}
+
+	LOG_INF("=== What colors do you see? ===");
+}
 
 static int display_image(const struct device *dev, const image_t *img)
 {
@@ -46,6 +111,14 @@ int main(void)
 	struct display_capabilities caps;
 	int current_image = 0;
 	int ret;
+
+	/* Enable USB for picotool and console */
+	if (usb_enable(NULL)) {
+		LOG_WRN("USB enable failed");
+	}
+
+	/* Brief delay for USB enumeration */
+	k_sleep(K_MSEC(500));
 
 	LOG_INF("=================================");
 	LOG_INF("Lilly - Christmas Ornament");
@@ -82,6 +155,18 @@ int main(void)
 		LOG_WRN("Failed to turn off blanking: %d", ret);
 	}
 
+	// /* === COLOR DEBUG MODE === */
+	// display_color_test(display_dev);
+	// LOG_INF("Color test displayed. Check the screen!");
+
+	// while (1) {
+	// 	if (gpio_is_ready_dt(&led)) {
+	// 		gpio_pin_toggle_dt(&led);
+	// 	}
+	// 	k_sleep(K_MSEC(500));
+	// }
+
+ /* Slideshow disabled for color debugging */
 	LOG_INF("Starting slideshow (%d ms per image)", SLIDE_DURATION_MS);
 
 	/* Main slideshow loop */
@@ -108,6 +193,7 @@ int main(void)
 		/* Next image (wrap around) */
 		current_image = (current_image + 1) % IMAGE_COUNT;
 	}
+
 
 	return 0;
 }

@@ -26,8 +26,10 @@ OUT_DIR = Path(__file__).parent / "src" / "generated"
 
 
 def rgb888_to_rgb565(r, g, b):
-    """Convert 8-bit RGB to 16-bit RGB565."""
-    return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3)
+    """Convert 8-bit RGB to 16-bit RGB565 (byte-swapped for little-endian MCU)."""
+    rgb565 = ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3)
+    # Swap bytes: GC9A01 display expects big-endian, RP2350 is little-endian
+    return ((rgb565 >> 8) & 0xFF) | ((rgb565 & 0xFF) << 8)
 
 
 def process_image(img_path):
