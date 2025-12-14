@@ -1,0 +1,55 @@
+/*
+ * Waveshare RP2350-LCD-1.28 Display Overlay
+ *
+ * Pin mapping:
+ *   SPI1_CLK  = GPIO 10
+ *   SPI1_MOSI = GPIO 11
+ *   LCD_CS    = GPIO 9
+ *   LCD_DC    = GPIO 8
+ *   LCD_RST   = GPIO 12
+ *   LCD_BL    = GPIO 25
+ */
+
+#include <zephyr/dt-bindings/display/panel.h>
+
+/ {
+	chosen {
+		zephyr,display = &gc9a01;
+	};
+
+	mipi_dbi {
+		compatible = "zephyr,mipi-dbi-spi";
+		spi-dev = <&spi1>;
+		dc-gpios = <&gpio0 8 GPIO_ACTIVE_HIGH>;
+		reset-gpios = <&gpio0 12 GPIO_ACTIVE_LOW>;
+		write-only;
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		gc9a01: gc9a01@0 {
+			compatible = "galaxycore,gc9x01x";
+			reg = <0>;
+			mipi-max-frequency = <32000000>;
+			pixel-format = <PANEL_PIXEL_FORMAT_RGB_565>;
+			display-inversion;
+			width = <240>;
+			height = <240>;
+		};
+	};
+};
+
+&pinctrl {
+	spi1_default: spi1_default {
+		group1 {
+			pinmux = <SPI1_SCK_P10>, <SPI1_TX_P11>;
+		};
+	};
+};
+
+&spi1 {
+	status = "okay";
+	clock-frequency = <32000000>;
+	pinctrl-0 = <&spi1_default>;
+	pinctrl-names = "default";
+	cs-gpios = <&gpio0 9 GPIO_ACTIVE_LOW>;
+};

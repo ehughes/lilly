@@ -1,13 +1,39 @@
 # Lilly - Christmas Ornament Photo Slideshow
 
-A memorial photo slideshow ornament using the Waveshare RP2350-LCD-1.28 board with a 240x240 round GC9A01 display.
+A memorial photo slideshow ornament for Lilly, built using the Waveshare RP2350-LCD-1.28 board with a 240x240 round GC9A01 display.
+
+## Project Goals
+
+- Display a rotating slideshow of photos on a round 1.28" LCD
+- Smooth crossfade transitions between images
+- Battery-powered for tree mounting
+- 3D printed ornament enclosure
+- Simple, minimal Zephyr RTOS implementation
 
 ## Hardware
 
-- **Board**: Waveshare RP2350-LCD-1.28
-- **MCU**: RP2350 (Dual Cortex-M33 @ 150MHz)
-- **Display**: 1.28" Round IPS LCD, 240x240, GC9A01A controller
-- **IMU**: QMI8658 (accelerometer + gyroscope)
+| Component | Details |
+|-----------|---------|
+| **Board** | Waveshare RP2350-LCD-1.28 |
+| **MCU** | RP2350 (Dual Cortex-M33 @ 150MHz) |
+| **Flash** | 4MB |
+| **RAM** | 520KB SRAM |
+| **Display** | 1.28" Round IPS LCD, 240x240, GC9A01A controller, SPI |
+| **IMU** | QMI8658 (accelerometer + gyroscope) |
+| **Battery** | 3.7V LiPo via MX1.25 header (ETA6096 charge IC) |
+
+### Pin Mapping (Waveshare RP2350-LCD-1.28)
+
+| Function | GPIO | Notes |
+|----------|------|-------|
+| SPI1_CLK | 10 | Display clock |
+| SPI1_MOSI | 11 | Display data |
+| LCD_CS | 9 | Chip select |
+| LCD_DC | 8 | Data/Command |
+| LCD_RST | 12 | Reset |
+| LCD_BL | 25 | Backlight (PWM) |
+| I2C1_SDA | 6 | IMU data |
+| I2C1_SCL | 7 | IMU clock |
 
 ## Quick Start
 
