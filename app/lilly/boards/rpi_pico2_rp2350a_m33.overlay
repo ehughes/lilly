@@ -1,12 +1,12 @@
 /*
- * Waveshare RP2350-LCD-1.28 Display Overlay
+ * Waveshare RP2350-Touch-LCD-1.28 Display Overlay
  *
- * Pin mapping:
+ * Pin mapping (from Waveshare DEV_Config.h):
  *   SPI1_CLK  = GPIO 10
  *   SPI1_MOSI = GPIO 11
  *   LCD_CS    = GPIO 9
  *   LCD_DC    = GPIO 8
- *   LCD_RST   = GPIO 12
+ *   LCD_RST   = GPIO 13
  *   LCD_BL    = GPIO 25
  */
 
@@ -18,11 +18,19 @@
 		zephyr,console = &cdc_acm_uart0;
 	};
 
+	/* Backlight control - active high to turn on */
+	backlight: backlight {
+		compatible = "gpio-leds";
+		lcd_backlight: lcd_backlight {
+			gpios = <&gpio0 25 GPIO_ACTIVE_HIGH>;
+		};
+	};
+
 	mipi_dbi {
 		compatible = "zephyr,mipi-dbi-spi";
 		spi-dev = <&spi1>;
 		dc-gpios = <&gpio0 8 GPIO_ACTIVE_HIGH>;
-		reset-gpios = <&gpio0 12 GPIO_ACTIVE_LOW>;
+		reset-gpios = <&gpio0 13 GPIO_ACTIVE_LOW>;
 		write-only;
 		#address-cells = <1>;
 		#size-cells = <0>;
@@ -30,7 +38,7 @@
 		gc9a01: gc9a01@0 {
 			compatible = "galaxycore,gc9x01x";
 			reg = <0>;
-			mipi-max-frequency = <32000000>;
+			mipi-max-frequency = <50000000>;
 			pixel-format = <PANEL_PIXEL_FORMAT_RGB_565>;
 			display-inversion;
 			width = <240>;
@@ -49,7 +57,7 @@
 
 &spi1 {
 	status = "okay";
-	clock-frequency = <32000000>;
+	clock-frequency = <50000000>;
 	pinctrl-0 = <&spi1_default>;
 	pinctrl-names = "default";
 	cs-gpios = <&gpio0 9 GPIO_ACTIVE_LOW>;

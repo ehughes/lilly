@@ -5,17 +5,21 @@
 #include <stdint.h>
 #include <stddef.h>
 
+/*
+ * Images stored as RGB888 (3 bytes per pixel) for fast crossfade blending.
+ * Layout: [R0, G0, B0, R1, G1, B1, ...]
+ * Conversion to RGB565 happens at display time.
+ */
 typedef struct {
-    const uint16_t *data;
-    size_t width;
-    size_t height;
-    size_t size;
+    const uint8_t *data;   /* RGB888 pixel data */
     const char *name;
 } image_t;
 
 #define IMAGE_COUNT 12
 #define IMAGE_WIDTH 240
 #define IMAGE_HEIGHT 240
+#define IMAGE_PIXELS 57600
+#define IMAGE_STRIDE 3  /* bytes per pixel (RGB888) */
 
 extern const image_t images[IMAGE_COUNT];
 
