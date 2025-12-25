@@ -69,8 +69,6 @@ static int usb_init(void)
 	return usbd_enable(&usbd);
 }
 
-/* NOTE: Do NOT use led0 on Waveshare board - it conflicts with display! */
-
 /* Backlight GPIO - must be turned on for display to be visible */
 static const struct gpio_dt_spec backlight = GPIO_DT_SPEC_GET(DT_NODELABEL(lcd_backlight), gpios);
 
@@ -331,7 +329,6 @@ int main(void)
 	LOG_INF("=================================");
 	LOG_INF("Images: %d", IMAGE_COUNT);
 
-	/* Turn on backlight - CRITICAL for display visibility */
 	if (gpio_is_ready_dt(&backlight)) {
 		gpio_pin_configure_dt(&backlight, GPIO_OUTPUT_ACTIVE);
 		gpio_pin_set_dt(&backlight, 1);
@@ -364,18 +361,6 @@ int main(void)
 	if (ret < 0 && ret != -ENOSYS) {
 		LOG_WRN("Failed to turn off blanking: %d", ret);
 	}
-
-	// /* === COLOR DEBUG MODE === */
-	// display_color_test(display_dev);
-	// LOG_INF("Color test displayed. Check the screen!");
-
-	// while (1) {
-	// 	if (gpio_is_ready_dt(&led)) {
-	// 		gpio_pin_toggle_dt(&led);
-	// 	}
-	// 	k_sleep(K_MSEC(500));
-	// }
-
 
 	/* Fade in first image from black */
 	const image_t *img = &images[current_image];
