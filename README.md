@@ -2,6 +2,10 @@
 
 A memorial photo slideshow ornament for Lilly, built using the Waveshare RP2350-LCD-1.28 board with a 240x240 round display.
 
+<img width="2059" height="1080" alt="image" src="https://github.com/user-attachments/assets/ee04cb73-1d1c-4dbb-b7bd-28b69999b6ae" />
+
+Display:
+
 https://www.waveshare.com/rp2350-lcd-1.28.htm
 
 ### Prerequisites
